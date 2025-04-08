@@ -30,7 +30,7 @@ public class TerrainGenerator : MonoBehaviour
     public float heightMultiplier = 1;
 
     [Tooltip("How the different octaves of perlin noise are translated in x and y direction")]
-    public Vector2[] octaveOffsets;
+    private Vector2[] octaveOffsets;
 
 
     [Space(10)]
@@ -38,14 +38,23 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Awake()
     {
+        CreateMeshVar();
+        CreateNewMap();
+    }
+
+    private void CreateMeshVar()
+    {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         octaveOffsets = GetOffsetSeed();
-        CreateNewMap();
     }
 
     public void CreateNewMap()
     {
+        if(!mesh)
+        {
+            CreateMeshVar();
+        }
         CreateMeshShape();
         CreateTriangles();
         UpdateMesh();
@@ -157,13 +166,5 @@ public class TerrainGenerator : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
         GetComponent<MeshCollider>().sharedMesh = mesh;
-    }
-
-    private void OnValidate()
-    {
-        if(Application.isPlaying && mesh)
-        {
-            CreateNewMap();
-        }
     }
 }
