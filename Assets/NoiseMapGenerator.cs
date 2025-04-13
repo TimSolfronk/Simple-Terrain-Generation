@@ -9,11 +9,9 @@ public static class NoiseMapGenerator
 
     //This uses Unities default Perlin Noise
     //TODO: add improved perlin noise to not get grid artifacts when setting Offsets to high numbers, while having Noise Scale on something high
-    public static float[,] GeneratePerlinNoiseMap(int xChunkSize, int zChunkSize, int seed, float noiseScale, int octaves, float lacunarity, float persistance, bool normalized)
+    public static float[,] GeneratePerlinNoiseMap(int xChunkSize, int zChunkSize, int seed, float noiseScale, int octaves, float lacunarity, float persistance, Vector2 chunkOffset, Vector2[] octaveOffsets, bool normalized)
     {
         float[,] noiseMap = new float[xChunkSize + 1, zChunkSize + 1];
-
-        Vector2[] octaveOffsets = GetOffsetSeed(seed, octaves);
 
         if (noiseScale <= 0)
             noiseScale = 0.0001f;
@@ -27,7 +25,7 @@ public static class NoiseMapGenerator
             {
 
                 // Assign and set height of each data point
-                float noiseHeight = GenerateNoiseHeight(x, z, octaveOffsets, noiseScale, lacunarity, persistance);
+                float noiseHeight = GenerateNoiseHeight(x, z, chunkOffset, octaveOffsets, noiseScale, lacunarity, persistance);
 
                 if(noiseHeight > maxNoiseHeight)
                 {
@@ -60,7 +58,7 @@ public static class NoiseMapGenerator
         return noiseMap;
     }
 
-    private static Vector2[] GetOffsetSeed(int seed, int octaves)
+    public static Vector2[] GetOffsetSeed(int seed, int octaves)
     {
         // changes area of map
 
@@ -76,7 +74,7 @@ public static class NoiseMapGenerator
         return octaveOffsets;
     }
 
-    private static float GenerateNoiseHeight(float x, float z, Vector2[] octaveOffsets, float noiseScale, float lacunarity, float persistance)
+    private static float GenerateNoiseHeight(float x, float z, Vector2 chunkOffset, Vector2[] octaveOffsets, float noiseScale, float lacunarity, float persistance)
     {
         float amplitude = BASE_AMPLITUDE;
         float frequency = BASE_FREQUENCY;
@@ -85,8 +83,8 @@ public static class NoiseMapGenerator
         // loop over octaves
         for (int i = 0; i < octaveOffsets.Length; i++)
         {
-            float mapX = x / noiseScale * frequency + octaveOffsets[i].x;
-            float mapZ = z / noiseScale * frequency + octaveOffsets[i].y;
+            float mapX = (x + chunkOffset.x) / noiseScale * frequency + octaveOffsets[i].x;
+            float mapZ = (z + chunkOffset.y) / noiseScale * frequency + octaveOffsets[i].y;
 
             // Create perlinValues  
             // The *2-1 is to create a flat floor level

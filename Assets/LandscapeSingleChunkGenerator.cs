@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LandscapeGenerator : MonoBehaviour
+public class LandscapeSingleChunkGenerator : MonoBehaviour
 {
     public enum GeneratingType {LayeredPerlinNoise};
     public GeneratingType generatingType;
@@ -51,7 +51,9 @@ public class LandscapeGenerator : MonoBehaviour
             seed = Random.Range(0, 1000);
         }
 
-        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(CHUNK_SIZE, CHUNK_SIZE, seed, noiseScale, octaves, lacunarity, persistance, normalizeChunk);
+        Vector2[] octaveOffsets = NoiseMapGenerator.GetOffsetSeed(seed, octaves);
+        Vector2 playerOffset = new Vector2(0, 0);
+        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(CHUNK_SIZE, CHUNK_SIZE, seed, noiseScale, octaves, lacunarity, persistance, playerOffset, octaveOffsets, normalizeChunk);
         Texture2D texture = null;
         MeshData meshData = null;
 

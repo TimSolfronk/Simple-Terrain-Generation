@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(LandscapeGenerator))]
+[CustomEditor(typeof(LandscapeSingleChunkGenerator))]
 public class TerrainGeneratorEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        LandscapeGenerator gen = (LandscapeGenerator)target;
+        LandscapeSingleChunkGenerator gen = (LandscapeSingleChunkGenerator)target;
 
         serializedObject.Update();
 
