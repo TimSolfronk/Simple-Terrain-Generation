@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LandscapeGenerator : MonoBehaviour
 {
-    public enum GeneratingType {StackedPerlinNoise};
+    public enum GeneratingType {LayeredPerlinNoise};
     public GeneratingType generatingType;
     public enum DisplayMode {Plane,Terrain};
     public DisplayMode displayMode;
@@ -14,15 +14,13 @@ public class LandscapeGenerator : MonoBehaviour
     private Vector3[] vertices;
     private int[] triangles;
 
-    [Range(1,10000)]
-    public int xSize = 500;
-    [Range(1, 10000)]
-    public int zSize = 500;
+    const int CHUNK_SIZE = 240;
 
-    [Range(1,10)]
-    public int terrainResolution = 1;
+    [Range(0,7)]
+    public int levelOfDetail = 0;
 
-    public float noiseScale = 50;
+    [Range(20,10000)]
+    public float noiseScale = 400;
 
     [Tooltip("An octave is one layer of perlin Noise")]
     [Range(1,10)]
@@ -33,9 +31,9 @@ public class LandscapeGenerator : MonoBehaviour
     public float persistance = 0.5f;
     public int seed;
 
-    [Range(0.01f,50f)]
+    [Range(1f,1000f)]
     public float heightMultiplier = 1;
-
+    public bool normalizeChunk = true;
 
     [Space(10)]
     public bool changeSeedOnReload = true;
@@ -53,17 +51,17 @@ public class LandscapeGenerator : MonoBehaviour
             seed = Random.Range(0, 1000);
         }
 
-        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(xSize, zSize, seed, terrainResolution, noiseScale, octaves, lacunarity, persistance);
+        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(CHUNK_SIZE, CHUNK_SIZE, seed, noiseScale, octaves, lacunarity, persistance, normalizeChunk);
         Texture2D texture = null;
         MeshData meshData = null;
 
         switch(displayMode)
         {
             case DisplayMode.Plane:
-                meshData = MeshGenerator.GenerateMeshData(noiseMap, terrainResolution, 0, heightCurve);
+                meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, 0, heightCurve);
                 break;
             case DisplayMode.Terrain:
-                meshData = MeshGenerator.GenerateMeshData(noiseMap, terrainResolution, heightMultiplier, heightCurve);
+                meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, heightMultiplier, heightCurve);
                 break;
         }
 

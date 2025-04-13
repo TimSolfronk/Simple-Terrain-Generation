@@ -2,9 +2,16 @@ using UnityEngine;
 
 public static class NoiseMapGenerator 
 {
-    public static float[,] GeneratePerlinNoiseMap(int xSize, int zSize, int seed, int terrainResolution, float noiseScale, int octaves, float lacunarity, float persistance)
+    const float BASE_AMPLITUDE = 1f;
+    const float BASE_FREQUENCY = 1f;
+
+
+
+    //This uses Unities default Perlin Noise
+    //TODO: add improved perlin noise to not get grid artifacts when setting Offsets to high numbers, while having Noise Scale on something high
+    public static float[,] GeneratePerlinNoiseMap(int xChunkSize, int zChunkSize, int seed, float noiseScale, int octaves, float lacunarity, float persistance, bool normalized)
     {
-        float[,] noiseMap = new float[xSize * terrainResolution, zSize * terrainResolution];
+        float[,] noiseMap = new float[xChunkSize + 1, zChunkSize + 1];
 
         Vector2[] octaveOffsets = GetOffsetSeed(seed, octaves);
 
@@ -18,11 +25,9 @@ public static class NoiseMapGenerator
         {
             for (int z = 0; z < noiseMap.GetLength(1); z++)
             {
-                float scaledXCoord = x / (float)terrainResolution;
-                float scaledZCoord = z / (float)terrainResolution;
 
                 // Assign and set height of each data point
-                float noiseHeight = GenerateNoiseHeight(scaledXCoord, scaledZCoord, octaveOffsets, noiseScale, lacunarity, persistance);
+                float noiseHeight = GenerateNoiseHeight(x, z, octaveOffsets, noiseScale, lacunarity, persistance);
 
                 if(noiseHeight > maxNoiseHeight)
                 {
@@ -36,6 +41,12 @@ public static class NoiseMapGenerator
 
             }
         }
+
+        if(!normalized)
+        {
+            maxNoiseHeight = MinOrMaxNoiseHeight(octaves, lacunarity, persistance, true);
+            minNoiseHeight = MinOrMaxNoiseHeight(octaves, lacunarity, persistance, false);
+        } 
 
         //now normalize the NoiseMap
         for (int x = 0; x < noiseMap.GetLength(0); x++)
@@ -58,8 +69,8 @@ public static class NoiseMapGenerator
 
         for (int o = 0; o < octaves; o++)
         {
-            float offsetX = prng.Next(-100000, 100000);
-            float offsetY = prng.Next(-100000, 100000);
+            float offsetX = prng.Next(-1000, 1000);
+            float offsetY = prng.Next(-1000, 1000);
             octaveOffsets[o] = new Vector2(offsetX, offsetY);
         }
         return octaveOffsets;
@@ -67,8 +78,8 @@ public static class NoiseMapGenerator
 
     private static float GenerateNoiseHeight(float x, float z, Vector2[] octaveOffsets, float noiseScale, float lacunarity, float persistance)
     {
-        float amplitude = 1;
-        float frequency = 1;
+        float amplitude = BASE_AMPLITUDE;
+        float frequency = BASE_FREQUENCY;
         float noiseHeight = 0;
 
         // loop over octaves
@@ -87,4 +98,22 @@ public static class NoiseMapGenerator
         }
         return noiseHeight;
     }
+
+    private static float MinOrMaxNoiseHeight(int octaveAmount, float lacunarity, float persistance, bool max)
+    {
+        float amplitude = BASE_AMPLITUDE;
+        float frequency = BASE_FREQUENCY;
+        float extremeNoiseHeight = 0;
+
+        // loop over octaves
+        for (int i = 0; i < octaveAmount; i++)
+        { 
+            float perlinValue = max ? 1f : -1f;
+            extremeNoiseHeight += perlinValue * amplitude;
+            frequency *= lacunarity;
+            amplitude *= persistance;
+        }
+        return extremeNoiseHeight;
+    }
+
 }
