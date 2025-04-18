@@ -14,7 +14,7 @@ public class LandscapeSingleChunkGenerator : MonoBehaviour
     private Vector3[] vertices;
     private int[] triangles;
 
-    const int CHUNK_SIZE = 240;
+    
 
     [Range(0,7)]
     public int levelOfDetail = 0;
@@ -53,7 +53,8 @@ public class LandscapeSingleChunkGenerator : MonoBehaviour
 
         Vector2[] octaveOffsets = NoiseMapGenerator.GetOffsetSeed(seed, octaves);
         Vector2 playerOffset = new Vector2(0, 0);
-        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(CHUNK_SIZE, CHUNK_SIZE, seed, noiseScale, octaves, lacunarity, persistance, playerOffset, octaveOffsets, normalizeChunk);
+        int chunkSize = TerrainGenerationConfig.GetChunkSize();
+        float[,] noiseMap = NoiseMapGenerator.GeneratePerlinNoiseMap(chunkSize, chunkSize, seed, noiseScale, octaves, lacunarity, persistance, playerOffset, octaveOffsets, normalizeChunk);
         Texture2D texture = null;
         MeshData meshData = null;
 
